@@ -1,0 +1,10 @@
+using LoadSceneMode = UnityEngine.SceneManagement.LoadSceneMode;
+using Dictionary = System.Collections.Generic.Dictionary<int, string>;
+public static class AddressableName
+{
+	public static readonly Dictionary addressables = new Dictionary()
+	{
+		{-9998,"New Scene"},
+
+	};
+}
