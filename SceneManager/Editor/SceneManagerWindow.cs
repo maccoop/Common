@@ -20,22 +20,25 @@ public class SceneObjectData
     public LoadSceneMode mode;
     [OnValueChanged(nameof(OnAddressableChange))]
     public bool addressable;
-    [ShowIf("addressable"), ReadOnly]
-    public string addressableName;
+    [OnValueChanged(nameof(OnAssetBundleChange))]
+    public bool assetBundle;
+    [ShowIf("@this.assetBundle || this.addressable"), ReadOnly]
+    public string assetName;
 
 
     private void OnChangeAsset()
     {
         if (asset != null)
-            addressableName = asset.name;
+            assetName = asset.name;
         else
-            addressableName = "";
+            assetName = "";
     }
     private void OnActiveChange()
     {
         if (active)
         {
             addressable = false;
+            assetBundle = false;
         }
     }
     private void OnAddressableChange()
@@ -43,6 +46,15 @@ public class SceneObjectData
         if (addressable)
         {
             active = false;
+            assetBundle = false;
+        }
+    }
+    private void OnAssetBundleChange()
+    {
+        if (assetBundle)
+        {
+            active = false;
+            addressable = false;
         }
     }
 
@@ -50,9 +62,9 @@ public class SceneObjectData
 
 public class SceneManagerWindow : OdinEditorWindow
 {
-    private string AddressableNameTemplate;
     private string SceneLoadingSettingTemplate;
     private string SceneNameTemplate;
+    private int max = 9999;
 
 
     [Title("Scene In Build"), TableList(CellPadding = 5)]
@@ -72,13 +84,22 @@ public class SceneManagerWindow : OdinEditorWindow
         m_SceneAssets = new List<SceneObjectData>();
         LoadTemplate();
         int index = 0;
-        foreach (var e in list)
+        for (int i = 0; i < list.Count; i++)
         {
+            var e = list[i];
             var scene = AssetDatabase.LoadAssetAtPath<SceneAsset>(e.path);
+            if (scene == null)
+                continue;
             var setting = SceneSetting.Default;
             if (SceneLoadSetting.settings.ContainsKey(index))
             {
                 setting = SceneLoadSetting.settings[index];
+            }
+            else
+            {
+                var cindex = GetIndexAssetData(max, i);
+                if (SceneLoadSetting.settings.ContainsKey(cindex))
+                    setting = SceneLoadSetting.settings[cindex];
             }
             m_SceneAssets.Add(new SceneObjectData()
             {
@@ -87,7 +108,8 @@ public class SceneManagerWindow : OdinEditorWindow
                 activeLoading = setting.SceneLoading,
                 mode = setting.Mode,
                 addressable = setting.Addressable,
-                addressableName = scene.name
+                assetName = scene.name,
+                assetBundle = setting.AssetBundle
             });
             index++;
         }
@@ -95,11 +117,16 @@ public class SceneManagerWindow : OdinEditorWindow
 
     private void LoadTemplate()
     {
-        throw new NotImplementedException();
+        var path2 = "Assets/Common/SceneManager/Editor/tmp_sceneLoadingSetting.txt";
+        var path3 = "Assets/Common/SceneManager/Editor/tmp_sceneName.txt";
+        var tmp_sceneLoadSetting = (TextAsset)AssetDatabase.LoadAssetAtPath(path2, typeof(TextAsset));
+        var tmp_SceneName = (TextAsset)AssetDatabase.LoadAssetAtPath(path3, typeof(TextAsset));
+        SceneLoadingSettingTemplate = tmp_sceneLoadSetting.text;
+        SceneNameTemplate = tmp_SceneName.text;
     }
 
     [Button("Apply")]
-    [Tooltip("Change Build Settings window Scene list and enum SceneName.cs")]
+    [Title("Change Build Settings window Scene list and enum SceneName.cs")]
     public void Genarate()
     {
         if (m_SceneAssets.Count > 0)
@@ -127,42 +154,44 @@ public class SceneManagerWindow : OdinEditorWindow
 
     private void GenarateEnum()
     {
-        var strAddressable = headerAddressableName;
-        var strSceneName = headerSceneName;
-        var strSceneSetting = headerSceneLoadingSetting;
+        var strSceneName = SceneNameTemplate;
+        var strSceneSetting = SceneLoadingSettingTemplate;
         int index = 0;
-        int max = 9999;
+        var caddress = "";
+        var cscene = "";
+        var csetting = "";
         for (int i = 0; i < m_SceneAssets.Count; i++)
         {
             if (m_SceneAssets[i].asset == null)
             {
                 continue;
             }
-            if (m_SceneAssets[i].addressable)
-            {
-                var cindex = i - max;
-                strAddressable += GetDataStringOfAddressableName(cindex, i);
-            }
             if (!m_SceneAssets[i].active)
             {
-                var cindex = i - max;
-                strSceneName += GetDataStringOfSceneName(cindex, i);
-                strSceneSetting += GetDataStringOfSceneSetting(cindex, i);
+                int cindex = GetIndexAssetData(max, i);
+                cscene += GetDataStringOfSceneName(cindex, i);
+                csetting += GetDataStringOfSceneSetting(cindex, i);
             }
             else
             {
-                strSceneName += GetDataStringOfSceneName(index, i);
-                strSceneSetting += GetDataStringOfSceneSetting(index, i);
+                cscene += GetDataStringOfSceneName(index, i);
+                csetting += GetDataStringOfSceneSetting(index, i);
                 index++;
             }
         }
-        strSceneName += footerSceneName;
-        strSceneSetting += footerSceneLoadingSetting;
-        strAddressable += footerAddressableName;
+        strSceneName = strSceneName.Replace("@", cscene);
+        strSceneSetting = strSceneSetting.Replace("@", csetting);
+        //strSceneName += footerSceneName;
+        //strSceneSetting += footerSceneLoadingSetting;
+        //strAddressable += footerAddressableName;
         SaveScripts(strSceneName, "SceneName");
         SaveScripts(strSceneSetting, "SceneLoadingSetting");
-        SaveScripts(strAddressable, "AddressableName");
         AssetDatabase.Refresh();
+    }
+
+    private static int GetIndexAssetData(int max, int i)
+    {
+        return i - max;
     }
 
     private void SaveScripts(string data, string filename)
@@ -178,7 +207,9 @@ public class SceneManagerWindow : OdinEditorWindow
             $"{m_SceneAssets[i].active.ToString().ToLower()}, " +
             $"{m_SceneAssets[i].activeLoading.ToString().ToLower()}, " +
             $"{nameof(LoadSceneMode)}.{m_SceneAssets[i].mode.ToString()}, " +
-            $"{m_SceneAssets[i].addressable.ToString().ToLower()}" +
+            $"{m_SceneAssets[i].addressable.ToString().ToLower()}," +
+            $"{m_SceneAssets[i].assetBundle.ToString().ToLower()}," +
+            $"\"{m_SceneAssets[i].assetName}\"" +
             $")}}";
         if (index < m_SceneAssets.Count - 1)
         {
@@ -190,7 +221,7 @@ public class SceneManagerWindow : OdinEditorWindow
     private string GetDataStringOfAddressableName(int index, int i)
     {
         var result = "\t\t";
-        result += $"{{{index},\"{m_SceneAssets[i].addressableName}\"}}";
+        result += $"{{{index},\"{m_SceneAssets[i].assetName}\"}}";
         if (index < m_SceneAssets.Count - 1)
         {
             result += objectPattern;
@@ -212,22 +243,8 @@ public class SceneManagerWindow : OdinEditorWindow
         }
         return result;
     }
-
-    const string headerSceneLoadingSetting = "using LoadSceneMode = UnityEngine.SceneManagement.LoadSceneMode;" +
-        "\nusing Dictionary = System.Collections.Generic.Dictionary<int, SceneSetting>;" +
-        "\npublic static class SceneLoadSetting" +
-        "\n{" +
-        "\n\tpublic static readonly Dictionary settings = new Dictionary()" +
-        "\n\t{\n";
-    const string footerSceneLoadingSetting = "\n\t};\n}";
-    const string headerAddressableName = "using LoadSceneMode = UnityEngine.SceneManagement.LoadSceneMode;" +
-        "\nusing Dictionary = System.Collections.Generic.Dictionary<int, string>;" +
-        "\npublic static class AddressableName" +
-        "\n{" +
-        "\n\tpublic static readonly Dictionary addressables = new Dictionary()" +
-        "\n\t{\n";
-    const string footerAddressableName = "\n\t};\n}";
-    const string headerSceneName = "public enum SceneName\n{\n";
-    const string footerSceneName = "\n}";
     const string objectPattern = ",\n";
+
+    static string tmp_sceneLoadingSetting = null;
+    static string tmp_sceneName = null;
 }

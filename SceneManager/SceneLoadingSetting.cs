@@ -4,9 +4,10 @@ public static class SceneLoadSetting
 {
 	public static readonly Dictionary settings = new Dictionary()
 	{
-		{0,new SceneSetting(true, true, LoadSceneMode.Single, false)},
-		{-9998,new SceneSetting(false, true, LoadSceneMode.Additive, true)},
-		{1,new SceneSetting(true, true, LoadSceneMode.Single, false)},
+		{0,new SceneSetting(true, true, LoadSceneMode.Single, false,false,"SampleScene")},
+		{1,new SceneSetting(true, true, LoadSceneMode.Single, false,false,"New Scene")},
+		{2,new SceneSetting(true, true, LoadSceneMode.Single, false,false,"New Scene 1")},
+		{-9996,new SceneSetting(false, true, LoadSceneMode.Single, false,true,"MiniGame2006")},
 
 	};
 }

@@ -4,6 +4,6 @@ public static class SceneLoadSetting
 {
 	public static readonly Dictionary settings = new Dictionary()
 	{
-		@
+@
 	};
 }

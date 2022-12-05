@@ -14,9 +14,11 @@ public class SceneManager : SingletonBehaviour<SceneManager>
     public delegate void BoolDelegate(int indexSceneBuild, bool value);
     public delegate void FloatDelegate(int indexSceneBuild, float value);
     public delegate void StringDelegate(int indexSceneBuild, string message);
+    public delegate void AssetDelegate(string assetName);
 
     public VoidDelegate OnBeginLoadScene;
-    public VoidDelegate OnStartLoadSceneAddressable;
+    public AssetDelegate OnLoadSceneAddressable;
+    public AssetDelegate OnLoadSceneAssetBundle;
     public FloatDelegate OnLoadSceneProgress;
     public BoolDelegate OnLoadSceneCompleted;
     public BoolDelegate OnActiveLoading;
@@ -32,11 +34,12 @@ public class SceneManager : SingletonBehaviour<SceneManager>
         OnLoadSceneProgress     += new FloatDelegate((name, value) =>   Debug?.Log($"On Load Scene {name}: {value}%"));
         OnActiveLoading         += new BoolDelegate((name, value) =>    Debug?.Log($"Active Loading Scene {name}: {value}"));
         OnLoadSceneError        += new StringDelegate((name, message) => Debug?.LogError($"Loading Scene Error {name}: {message}"));
-        OnStartLoadSceneAddressable += new VoidDelegate((name) =>       Debug?.Log($"Loading Scene Addressable: {name}"));
+        OnLoadSceneAddressable += new AssetDelegate((name) =>       Debug?.Log($"Loading Scene Addressable: {name}"));
+        OnLoadSceneAssetBundle  += new AssetDelegate((name) =>       Debug?.Log($"Loading Scene Assetbundle: {name}"));
         _queue = new QueueService<(int, LoadSceneMode)>();
         _queue.OnDequeue.AddListener(LoadSceneAction);
         _histories = new List<SceneName>();
-        Debug = new SangCustomLog();
+        //Debug = new SangCustomLog();
     }
 
     public void UnloadScene(SceneName scene)
@@ -63,7 +66,12 @@ public class SceneManager : SingletonBehaviour<SceneManager>
         GetSettingScene(scene, indexSceneBuild, out setting);
         if (setting.Addressable)
         {
-            OnStartLoadSceneAddressable.Invoke(indexSceneBuild);
+            OnLoadSceneAddressable.Invoke(setting.AssetName);
+            return;
+        }
+        if (setting.AssetBundle)
+        {
+            OnLoadSceneAssetBundle.Invoke(setting.AssetName);
             return;
         }
         if (!setting.Active)
