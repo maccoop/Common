@@ -17,8 +17,11 @@ public class SceneManager : SingletonBehaviour<SceneManager>
     public delegate void AssetDelegate(string assetName);
 
     public VoidDelegate OnBeginLoadScene;
+    public VoidDelegate OnUnloadScene;
     public AssetDelegate OnLoadSceneAddressable;
+    public AssetDelegate OnUnloadSceneAddressable;
     public AssetDelegate OnLoadSceneAssetBundle;
+    public AssetDelegate OnUnloadSceneAssetBundle;
     public FloatDelegate OnLoadSceneProgress;
     public BoolDelegate OnLoadSceneCompleted;
     public BoolDelegate OnActiveLoading;
@@ -29,17 +32,27 @@ public class SceneManager : SingletonBehaviour<SceneManager>
     protected override void Init()
     {
         DontDestroyOnLoad(gameObject);
-        OnBeginLoadScene        += new VoidDelegate((name) =>           Debug?.Log($"Begin Load Scene: {name}"));
-        OnLoadSceneCompleted    += new BoolDelegate((name, value) =>    Debug?.Log($"Load Scene {name}: done. Status: {value}"));
-        OnLoadSceneProgress     += new FloatDelegate((name, value) =>   Debug?.Log($"On Load Scene {name}: {value}%"));
-        OnActiveLoading         += new BoolDelegate((name, value) =>    Debug?.Log($"Active Loading Scene {name}: {value}"));
-        OnLoadSceneError        += new StringDelegate((name, message) => Debug?.LogError($"Loading Scene Error {name}: {message}"));
-        OnLoadSceneAddressable += new AssetDelegate((name) =>       Debug?.Log($"Loading Scene Addressable: {name}"));
-        OnLoadSceneAssetBundle  += new AssetDelegate((name) =>       Debug?.Log($"Loading Scene Assetbundle: {name}"));
+
+        // In App
+        OnBeginLoadScene += new VoidDelegate((name) => Debug?.Log($"Begin Load Scene: {name}"));
+        OnLoadSceneCompleted += new BoolDelegate((name, value) => Debug?.Log($"Load Scene {name}: done. Status: {value}"));
+        OnLoadSceneError += new StringDelegate((name, message) => Debug?.LogError($"Loading Scene Error {name}: {message}"));
+        OnUnloadScene += new VoidDelegate((name) => Debug?.Log($"Unload Scene Assetbundle: {name}"));
+        OnLoadSceneProgress += new FloatDelegate((name, value) => Debug?.Log($"On Load Scene {name}: {value}%"));
+        // Loading Panel
+        OnActiveLoading += new BoolDelegate((name, value) => Debug?.Log($"Active Loading Scene {name}: {value}"));
+        /// Addressable
+        OnLoadSceneAddressable += new AssetDelegate((name) => Debug?.Log($"Loading Scene Addressable: {name}"));
+        OnUnloadSceneAddressable += new AssetDelegate((name) => Debug?.Log($"Unload Scene Addressable: {name}"));
+        /// Asset Bundle
+        OnUnloadSceneAssetBundle += new AssetDelegate((name) => Debug?.Log($"Unload Scene Assetbundle: {name}"));
+        OnLoadSceneAssetBundle += new AssetDelegate((name) => Debug?.Log($"Loading Scene Assetbundle: {name}"));
+
+
         _queue = new QueueService<(int, LoadSceneMode)>();
         _queue.OnDequeue.AddListener(LoadSceneAction);
         _histories = new List<SceneName>();
-        //Debug = new SangCustomLog();
+        Debug = new SangCustomLog();
     }
 
     public void UnloadScene(SceneName scene)
@@ -47,14 +60,31 @@ public class SceneManager : SingletonBehaviour<SceneManager>
         SceneSetting setting;
         int indexSceneBuild = (int)scene;
         GetSettingScene(scene, indexSceneBuild, out setting);
-        if(setting.Mode == LoadSceneMode.Single)
+        if (setting.Mode == LoadSceneMode.Single)
         {
             Debug.LogError("Scene Load Mode single, can't Unload Scene!");
             return;
         }
         else
         {
-
+            if (setting.Active)
+            {
+                SceneManagement.UnloadSceneAsync((int)indexSceneBuild).completed += (operation) =>
+                {
+                    if (operation.isDone)
+                    {
+                        OnUnloadScene.Invoke(indexSceneBuild);
+                    }
+                };
+            }
+            else if (setting.Addressable)
+            {
+                OnUnloadSceneAddressable.Invoke(setting.AssetName);
+            }
+            else if (setting.AssetBundle)
+            {
+                OnUnloadSceneAssetBundle.Invoke(setting.AssetName);
+            }
         }
         /// continue
     }
