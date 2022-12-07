@@ -13,14 +13,16 @@ public class UserManager : SingletonBehaviour<UserManager>
         GetLocalToken();
     }
 
-    private void GetLocalToken()
+    public void GetLocalToken()
     {
-        if (PlayerPrefs.HasKey(nameof(_accessToken)){
+        if (PlayerPrefs.HasKey(nameof(_accessToken)))
+        {
             _accessToken = PlayerPrefs.GetString(nameof(_accessToken));
         }
         else
         {
-
+            Debug.LogError("Must Login!");
+            //SceneManager.Singleton.LoadScene(SceneName.LOGIN);
         }
     }
 }

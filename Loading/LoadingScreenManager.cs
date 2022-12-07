@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class LoadingManager : MonoBehaviour
+public class LoadingScreenManager : MonoBehaviour
 {
     const float DELAY_TIME_DISABLE_LOADING_SCREEN = 0.4f;
     public delegate void BoolDelegate(bool active);
@@ -32,6 +32,7 @@ public class LoadingManager : MonoBehaviour
             case true:
                 {
                     _cacheSceneLoading.Add(indexSceneBuild);
+                    OnActiveLoading.Invoke(true);
                     break;
                 }
             case false:
