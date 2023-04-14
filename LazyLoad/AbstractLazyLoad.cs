@@ -5,7 +5,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
-using Debug = SangCustomLog;
 
 [System.Serializable]
 public enum LazyReloadStatus
@@ -24,6 +23,7 @@ public abstract class AbstractLazyLoad : MonoBehaviour
     private protected TextMeshProUGUI textReload, textLoading;
     private bool isLoad = false;
     private bool mustReload;
+    private ILog Debug = new CustomLog();
 
     private void Awake()
     {

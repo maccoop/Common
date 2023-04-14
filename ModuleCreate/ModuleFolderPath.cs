@@ -9,7 +9,9 @@ public class ModuleFolderPath : EditorWindow
 {
     private String name;
     private static TextField inputName;
+    private static TextField inputAssembly;
     private static Button button;
+    private static Toggle toggle;
     public TextAsset assemplyExample;
 
 
@@ -30,18 +32,25 @@ public class ModuleFolderPath : EditorWindow
     {
 #if UNITY_EDITOR
         inputName = new TextField("Input name module: ");
-        button = new Button(() => CreateModulePath(inputName.text));
+        button = new Button(() => CreateModulePath());
         button.text = "Create";
+        toggle = new Toggle("Create Assembly: ");
+        inputAssembly = new TextField("Input namespace: ");
+
+
         rootVisualElement.Add(new Label("Input Module"));
         rootVisualElement.Add(inputName);
+        rootVisualElement.Add(toggle);
+        rootVisualElement.Add(inputAssembly);
         rootVisualElement.Add(button);
 #else
         Debug.Log("Plaftform not support");
 #endif
     }
 
-    public void CreateModulePath(String name)
+    public void CreateModulePath()
     {
+        name = inputName.value;
         var path = GetCurrentPath();
         if (CheckFolderExist(path, name))
         {
@@ -49,7 +58,8 @@ public class ModuleFolderPath : EditorWindow
             return;
         }
         CreatePath(name, path);
-        CreateAssembly(name, path);
+        if (toggle.value)
+            CreateAssembly(name, path);
         AssetDatabase.Refresh();
         Close();
     }
@@ -70,6 +80,7 @@ public class ModuleFolderPath : EditorWindow
         Debug.Log(pathAssembly);
         var content = assemplyExample.text;
         content = content.Replace("%name%", name);
+        content = content.Replace("%namespace%", inputAssembly.value);
         File.WriteAllText(pathAssembly, content);
     }
 

@@ -20,7 +20,7 @@ public class InAppEvent
         _eventKey = key;
         _guid = Guid.NewGuid();
         _eventReceiveData = new UnityEvent<object>();
-        Debug = new SangLog4();
+        Debug = new CustomLog();
         if (hasListener)
             EventManager.Singleton.StartListener(_eventKey, OnEventReceive);
     }

@@ -1,6 +1,6 @@
 {
     "name": "%name%",
-    "rootNamespace": "",
+    "rootNamespace": "%namespace%",
     "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],

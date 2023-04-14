@@ -10,7 +10,7 @@ public delegate void OnEventReceive<T>(T result, Guid guid);
 public class EventManager : SingletonBehaviour<EventManager>
 {
     private Dictionary<string, OnEventReceive<object>> _dictEvent;
-    private ILog Debug = new SangLog4();
+    private ILog Debug = new CustomLog();
 
     /// <summary>
     /// 

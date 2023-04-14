@@ -52,7 +52,7 @@ public class SceneManager : SingletonBehaviour<SceneManager>
         _queue = new QueueService<(int, LoadSceneMode)>();
         _queue.OnDequeue.AddListener(LoadSceneAction);
         _histories = new List<SceneName>();
-        Debug = new SangCustomLog();
+        Debug = new CustomLog();
     }
 
     public void UnloadScene(SceneName scene)
@@ -178,23 +178,5 @@ public class SceneManager : SingletonBehaviour<SceneManager>
         yield return new WaitForEndOfFrame();
         OnActiveLoading.Invoke(indexSceneBuild, false);
         _queue.EndQueue();
-    }
-}
-
-internal class SangCustomLog : ILog
-{
-    public void Log(object message)
-    {
-        Debug.Log(message);
-    }
-
-    public void LogError(object message)
-    {
-        Debug.LogError(message);
-    }
-
-    public void LogWarning(object message)
-    {
-        Debug.LogWarning(message);
     }
 }

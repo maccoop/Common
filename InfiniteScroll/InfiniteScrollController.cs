@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
-using Debug = SangCustomLog;
 
 [System.Serializable]
 public enum InfiniteScrollDirection
@@ -44,6 +43,7 @@ public class InfiniteScrollController : MonoBehaviour
     private Dictionary<object, string> _data;
     private Dictionary<object, (int position, int size)> _itemSize;
     private int _currentPosition;
+    private ILog Debug = new CustomLog();
     private int indexPosition
     {
         get
