@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 using UnityEngine;
 using Object = System.Object;
 
-namespace educa.core
+namespace mpz.core
 {
     /// <summary>
     /// Auto ref to service was contructor

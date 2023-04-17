@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace educa.core
+namespace mpz.core
 {
     internal static class TryCastHelper
     {

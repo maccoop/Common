@@ -5,9 +5,9 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
-namespace educa.core
+namespace mpz.core
 {
-    public class CoreMonoBehaviour : MonoBehaviour
+    public class MonoBehaviour : UnityEngine.MonoBehaviour
     {
         public virtual void Awake()
         {

@@ -157,7 +157,6 @@ public class SceneManagerWindow : OdinEditorWindow
         var strSceneName = SceneNameTemplate;
         var strSceneSetting = SceneLoadingSettingTemplate;
         int index = 0;
-        var caddress = "";
         var cscene = "";
         var csetting = "";
         for (int i = 0; i < m_SceneAssets.Count; i++)
@@ -181,9 +180,6 @@ public class SceneManagerWindow : OdinEditorWindow
         }
         strSceneName = strSceneName.Replace("@", cscene);
         strSceneSetting = strSceneSetting.Replace("@", csetting);
-        //strSceneName += footerSceneName;
-        //strSceneSetting += footerSceneLoadingSetting;
-        //strAddressable += footerAddressableName;
         SaveScripts(strSceneName, "SceneName");
         SaveScripts(strSceneSetting, "SceneLoadingSetting");
         AssetDatabase.Refresh();

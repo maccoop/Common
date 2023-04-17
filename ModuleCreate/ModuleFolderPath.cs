@@ -7,7 +7,7 @@ using Object = UnityEngine.Object;
 
 public class ModuleFolderPath : EditorWindow
 {
-    private String name;
+    private string moduleName;
     private static TextField inputName;
     private static TextField inputAssembly;
     private static Button button;
@@ -50,16 +50,16 @@ public class ModuleFolderPath : EditorWindow
 
     public void CreateModulePath()
     {
-        name = inputName.value;
+        moduleName = inputName.value;
         var path = GetCurrentPath();
-        if (CheckFolderExist(path, name))
+        if (CheckFolderExist(path, moduleName))
         {
             Debug.LogError("Module is exist!");
             return;
         }
-        CreatePath(name, path);
+        CreatePath(moduleName, path);
         if (toggle.value)
-            CreateAssembly(name, path);
+            CreateAssembly(moduleName, path);
         AssetDatabase.Refresh();
         Close();
     }

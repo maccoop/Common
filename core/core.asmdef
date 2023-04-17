@@ -1,6 +1,6 @@
 {
     "name": "core",
-    "rootNamespace": "educa.core",
+    "rootNamespace": "mpz.core",
     "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],

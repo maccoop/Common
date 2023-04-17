@@ -9,7 +9,7 @@ using System.Collections.Generic;
 public class SceneManager : SingletonBehaviour<SceneManager>
 {
     private QueueService<(int, LoadSceneMode)> _queue;
-    private ILog? Debug;
+    private ILog Debug;
     public delegate void VoidDelegate(int indexSceneBuild);
     public delegate void BoolDelegate(int indexSceneBuild, bool value);
     public delegate void FloatDelegate(int indexSceneBuild, float value);

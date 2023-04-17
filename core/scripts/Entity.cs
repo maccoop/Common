@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace educa.core
+namespace mpz.core
 {
     [System.Serializable]
     public class Entity

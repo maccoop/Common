@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
-namespace educa.core
+namespace mpz.core
 {
     internal class ServiceImp
     {
@@ -18,7 +18,7 @@ namespace educa.core
                 logServiceString += "\n\t" + e.Key;
                 try
                 {
-                    types[e.Key] = Activator.CreateInstance(e.Key);
+                    var obj = Activator.CreateInstance(e.Key);
                 }
                 catch (Exception es)
                 {

@@ -3,20 +3,17 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 
-namespace educa.core
+namespace mpz.core
 {
     public static class ServiceController
     {
-        internal static Assembly[] assemblies;
         private static Dictionary<Type, object> objects;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Start()
         {
-            assemblies = System.AppDomain.CurrentDomain.GetAssemblies();
+            var assemblies = System.AppDomain.CurrentDomain.GetAssemblies();
             InitService();
-            InitAutowire();
-
             #region local medthod
             void GetObjects()
             {
@@ -32,31 +29,17 @@ namespace educa.core
                         }
                         catch (Exception es)
                         {
-                            Debug.LogError("[Error]: " + ee);
+                            Debug.LogError("[Error]: " + es.Message);
                         }
                     }
                 }
             }
-
             void InitService()
             {
                 objects = new Dictionary<Type, object>();
                 GetObjects();
                 ServiceImp.Start(ref objects);
             }
-
-            void InitAutowire(){
-            }
-
-            void GetFieldInfo()
-            {
-                List<FieldInfo> results = new List<FieldInfo>();
-                for (int i = 0; i < assemblies.Length; i++)
-                {
-                    var list = GetTypesWithAutowireAttribute(assemblies[i]);
-                }
-            }
-
             #endregion
         }
 
